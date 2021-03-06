@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <script>
+        fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
+            .then(res => res.json())
+            .then(data => {
+                const yearMonthVar = (data.monthlyVariance)
+                const baseTemperature = (data.baseTemperature)
+                var formatDecimal = d3.format(".1f")
+
+                console.log(yearMonthVar)
+
+                function getMonthName(monthNumber){
+                    const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"]
+                    return monthNames[monthNumber-1]
+                }
+
+                function getTemp(tempvar) {
+                    return baseTemperature + tempvar
+                }
+
+                function getColumn(year) {
+                    return year - 1753
+                }
+
+                function getRow(month) {
+                    return month - 1
+                }
+                
+                function getColor(temp) {
+                    if (temp < 2) {
+                        return '#58EFEC'
+                    }
+                    else if (temp < 3) {
+                        return '#65E2E4'
+                    } 
+                    else if (temp < 4) {
+                        return '#72D4DB'
+                    } 
+                    else if (temp < 5) {
+                        return '#7FC7D3'
+                    } 
+                    else if (temp < 6) {
+                        return '#8CBACB'
+                    } 
+                    else if (temp < 7) {
+                        return '#99ACC2'
+                    } 
+                    else if (temp < 8) {
+                        return '#A79FBA'
+                    } 
+                    else if (temp < 9) {
+                        return '#B491B1'
+                    } 
+                    else if (temp < 10) {
+                        return '#C184A9'
+                    } 
+                    else if (temp < 11) {
+                        return '#CE77A1'
+                    } 
+                    else if (temp < 12) {
+                        return '#DB6998'
+                    } 
+                    else if (temp < 13) {
+                        return '#E85C90'
+                    }
+                    else {
+                        return '#F4387D'
+                    }
+                }
+
+                function mouseover(){
+                    d3.select(this)
+                    .attr("stroke","black")
+                    tooltip
+                    .style("opacity",1)
+                    .attr("width","120px")
+                    .attr("height",'auto')
+                }
+
+                function mousemove(event, d){
+                    tooltip
+                    .style("width","130px")
+                    .style("height",'auto')
+                    .style("top",d3.pointer(event)[1]-60+'px')
+                    .style("left",d3.pointer(event)[0]+'px')
+                    .html(
+                        `${d.year}, ${getMonthName(d.month)}<br>
+                    ${formatDecimal(getTemp(d.variance))}°C<br>
+                    ${formatDecimal(d.variance)}°C`)
+                    .attr('data-year',d.year)
+                }
+
+                function mouseout(){
+                    d3.select(this)
+                    .attr("stroke","none")
+                    tooltip
+                    .style("opacity",0)
+                    .text('') //very important
+
+                }
+
+                const rectWidth = 3
+                const rectHeigth = 10
+                const yearSpan = 2015 - 1753 + 1
+                const padding = { top: 30, right: 40, bottom: 100, left: 100 }
+                const h = rectHeigth * 12 + padding.top + padding.bottom
+                const w = rectWidth * yearSpan + padding.left + padding.right
+
+                const xScale = d3.scaleLinear().domain(d3.extent(yearMonthVar, (d) => d.year)).range([padding.left, w - padding.right])
+                const yScale = d3.scaleTime().domain([new Date(2000, 11, 16), new Date(2001, 11, 16)]).range([padding.top, h - padding.bottom])
+
+                const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"))
+                const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat('%B'))
+
+                var svg = d3.select("#svg-container").append("svg").attr('height', h).attr('width', w)
+                var tooltip = d3.select("#svg-container").append("div").style("opacity",0).attr("id","tooltip")
+                .style('position','absolute').style("text-align",'center').style("background-color","rgba(255,227,227,0.8)").style("color","rgb(84, 88, 99)")
+
+
+                svg.append("g")
+                    .attr('id', 'x-axis')
+                    .attr("transform", "translate(0," + (h - padding.bottom) + ")")
+                    .call(xAxis)
+                svg.append("g")
+                    .attr("id", "y-axis")
+                    .attr("transform", "translate(" + (padding.left) + ",0)")
+                    .call(yAxis)
+
+                svg.selectAll("rect")
+                    .data(yearMonthVar)
+                    .enter()
+                    .append("rect")
+                    .attr("class","cell")
+                    .attr("data-temp",(d)=>getTemp(d.variance))
+                    .attr("data-year",(d)=>d.year)
+                    .attr("data-month",(d)=>d.month-1)
+                    .attr("width", rectWidth)
+                    .attr("height", rectHeigth)
+                    .attr("x", (d) => getColumn(d.year) * rectWidth + padding.left)
+                    .attr('y', (d) => getRow(d.month) * rectHeigth + padding.top)
+                    .style("fill", (d) => {
+                        let temp = getTemp(d.variance)
+                        return getColor(temp)
+                    })
+                    .on("mouseover",mouseover)
+                    .on("mousemove",mousemove)
+                    .on("mouseout",mouseout)
+
+                var colors = ['#58EFEC','#65E2E4','#72D4DB','#7FC7D3','#8CBACB','#99ACC2','#A79FBA','#B491B1','#C184A9','#CE77A1','#DB6998','#E85C90','#F4387D']
+ 
+                
+
+ var legend = svg.append("g")
+  .attr("id", "legend")
+  .attr("x", 0)
+  .attr("y", 500)
+  .attr("height", 100)
+  .attr("width", 100);
+
+  legend.selectAll('rect')
+      .data(colors)
+      .enter()
+      .append('rect')
+      .attr("x", (d,i)=>padding.left+i*15)
+      .attr("y", h-padding.bottom+50)
+      .attr("width", 15)
+      .attr("height", 15)
+      .style("fill", (d)=>d);
+    
+    const colorScale = d3.scaleLinear().domain([1,14]).range([padding.left,padding.left+195])
+
+    const colorAxis = d3.axisBottom(colorScale)
+
+                    svg.append("g")
+                    .attr('id', 'c-axis')
+                    .attr("transform", "translate(0," + (h - padding.bottom+60) + ")")
+                    .call(colorAxis)
+
+
+
+
+                svg.append("rect") //svg border
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("height", h)
+                    .attr("width", w)
+                    .style("stroke", 'black')
+                    .style("stroke-width", 1)
+                    .style("fill", "none")
+            }
+            )
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .outer {
+            display: table;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .middle {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .inner {
+            margin-left: auto;
+            margin-right: auto;
+            width: 929px;
+        }
+
+        #svg-container {
+            position: relative;
+            width: 929px;
+        }
+    </style>
+
+    <div class="outer">
+        <div class="middle">
+            <div class="inner">
+                <h1 id="title">Monthly Global Land-Surface Temperature
+                </h1>
+                <h2 id="description">1753 - 2015: base temperature 8.66<b>℃</b>
+                </h2>
+                <div id="svg-container">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
