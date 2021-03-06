@@ -27,12 +27,10 @@
                 const baseTemperature = (data.baseTemperature)
                 var formatDecimal = d3.format(".1f")
 
-                console.log(yearMonthVar)
-
-                function getMonthName(monthNumber){
+                function getMonthName(monthNumber) {
                     const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"]
-                    return monthNames[monthNumber-1]
+                        "July", "August", "September", "October", "November", "December"]
+                    return monthNames[monthNumber - 1]
                 }
 
                 function getTemp(tempvar) {
@@ -46,41 +44,41 @@
                 function getRow(month) {
                     return month - 1
                 }
-                
+
                 function getColor(temp) {
                     if (temp < 2) {
                         return '#58EFEC'
                     }
                     else if (temp < 3) {
                         return '#65E2E4'
-                    } 
+                    }
                     else if (temp < 4) {
                         return '#72D4DB'
-                    } 
+                    }
                     else if (temp < 5) {
                         return '#7FC7D3'
-                    } 
+                    }
                     else if (temp < 6) {
                         return '#8CBACB'
-                    } 
+                    }
                     else if (temp < 7) {
                         return '#99ACC2'
-                    } 
+                    }
                     else if (temp < 8) {
                         return '#A79FBA'
-                    } 
+                    }
                     else if (temp < 9) {
                         return '#B491B1'
-                    } 
+                    }
                     else if (temp < 10) {
                         return '#C184A9'
-                    } 
+                    }
                     else if (temp < 11) {
                         return '#CE77A1'
-                    } 
+                    }
                     else if (temp < 12) {
                         return '#DB6998'
-                    } 
+                    }
                     else if (temp < 13) {
                         return '#E85C90'
                     }
@@ -89,34 +87,34 @@
                     }
                 }
 
-                function mouseover(){
+                function mouseover() {
                     d3.select(this)
-                    .attr("stroke","black")
+                        .attr("stroke", "black")
                     tooltip
-                    .style("opacity",1)
-                    .attr("width","120px")
-                    .attr("height",'auto')
+                        .style("opacity", 1)
+                        .attr("width", "120px")
+                        .attr("height", 'auto')
                 }
 
-                function mousemove(event, d){
+                function mousemove(event, d) {
                     tooltip
-                    .style("width","130px")
-                    .style("height",'auto')
-                    .style("top",d3.pointer(event)[1]-60+'px')
-                    .style("left",d3.pointer(event)[0]+'px')
-                    .html(
-                        `${d.year}, ${getMonthName(d.month)}<br>
+                        .style("width", "130px")
+                        .style("height", 'auto')
+                        .style("top", d3.pointer(event)[1] - 60 + 'px')
+                        .style("left", d3.pointer(event)[0] + 'px')
+                        .html(
+                            `${d.year}, ${getMonthName(d.month)}<br>
                     ${formatDecimal(getTemp(d.variance))}°C<br>
                     ${formatDecimal(d.variance)}°C`)
-                    .attr('data-year',d.year)
+                        .attr('data-year', d.year)
                 }
 
-                function mouseout(){
+                function mouseout() {
                     d3.select(this)
-                    .attr("stroke","none")
+                        .attr("stroke", "none")
                     tooltip
-                    .style("opacity",0)
-                    .text('') //very important
+                        .style("opacity", 0)
+                        .text('') //very important
 
                 }
 
@@ -127,15 +125,29 @@
                 const h = rectHeigth * 12 + padding.top + padding.bottom
                 const w = rectWidth * yearSpan + padding.left + padding.right
 
-                const xScale = d3.scaleLinear().domain(d3.extent(yearMonthVar, (d) => d.year)).range([padding.left, w - padding.right])
-                const yScale = d3.scaleTime().domain([new Date(2000, 11, 16), new Date(2001, 11, 16)]).range([padding.top, h - padding.bottom])
+                const xScale = d3.scaleLinear()
+                    .domain(d3.extent(yearMonthVar, (d) => d.year))
+                    .range([padding.left, w - padding.right])
+                const yScale = d3.scaleTime()
+                    .domain([new Date(2000, 11, 16), new Date(2001, 11, 16)])
+                    .range([padding.top, h - padding.bottom])
 
                 const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"))
                 const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat('%B'))
 
-                var svg = d3.select("#svg-container").append("svg").attr('height', h).attr('width', w)
-                var tooltip = d3.select("#svg-container").append("div").style("opacity",0).attr("id","tooltip")
-                .style('position','absolute').style("text-align",'center').style("background-color","rgba(255,227,227,0.8)").style("color","rgb(84, 88, 99)")
+                var svg = d3.select("#svg-container")
+                    .append("svg")
+                    .attr('height', h)
+                    .attr('width', w)
+
+                var tooltip = d3
+                    .select("#svg-container")
+                    .append("div").style("opacity", 0)
+                    .attr("id", "tooltip")
+                    .style('position', 'absolute')
+                    .style("text-align", 'center')
+                    .style("background-color", "rgba(255,227,227,0.8)")
+                    .style("color", "rgb(84, 88, 99)")
 
 
                 svg.append("g")
@@ -151,10 +163,10 @@
                     .data(yearMonthVar)
                     .enter()
                     .append("rect")
-                    .attr("class","cell")
-                    .attr("data-temp",(d)=>getTemp(d.variance))
-                    .attr("data-year",(d)=>d.year)
-                    .attr("data-month",(d)=>d.month-1)
+                    .attr("class", "cell")
+                    .attr("data-temp", (d) => getTemp(d.variance))
+                    .attr("data-year", (d) => d.year)
+                    .attr("data-month", (d) => d.month - 1)
                     .attr("width", rectWidth)
                     .attr("height", rectHeigth)
                     .attr("x", (d) => getColumn(d.year) * rectWidth + padding.left)
@@ -163,38 +175,38 @@
                         let temp = getTemp(d.variance)
                         return getColor(temp)
                     })
-                    .on("mouseover",mouseover)
-                    .on("mousemove",mousemove)
-                    .on("mouseout",mouseout)
+                    .on("mouseover", mouseover)
+                    .on("mousemove", mousemove)
+                    .on("mouseout", mouseout)
 
-                var colors = ['#58EFEC','#65E2E4','#72D4DB','#7FC7D3','#8CBACB','#99ACC2','#A79FBA','#B491B1','#C184A9','#CE77A1','#DB6998','#E85C90','#F4387D']
- 
-                
+                var colors = ['#58EFEC', '#65E2E4', '#72D4DB', '#7FC7D3', '#8CBACB', '#99ACC2', '#A79FBA', '#B491B1', '#C184A9', '#CE77A1', '#DB6998', '#E85C90', '#F4387D']
 
- var legend = svg.append("g")
-  .attr("id", "legend")
-  .attr("x", 0)
-  .attr("y", 500)
-  .attr("height", 100)
-  .attr("width", 100);
 
-  legend.selectAll('rect')
-      .data(colors)
-      .enter()
-      .append('rect')
-      .attr("x", (d,i)=>padding.left+i*15)
-      .attr("y", h-padding.bottom+50)
-      .attr("width", 15)
-      .attr("height", 15)
-      .style("fill", (d)=>d);
-    
-    const colorScale = d3.scaleLinear().domain([1,14]).range([padding.left,padding.left+195])
 
-    const colorAxis = d3.axisBottom(colorScale)
+                var legend = svg.append("g")
+                    .attr("id", "legend")
+                    .attr("x", 0)
+                    .attr("y", 500)
+                    .attr("height", 100)
+                    .attr("width", 100);
 
-                    svg.append("g")
+                legend.selectAll('rect')
+                    .data(colors)
+                    .enter()
+                    .append('rect')
+                    .attr("x", (d, i) => padding.left + i * 15)
+                    .attr("y", h - padding.bottom + 50)
+                    .attr("width", 15)
+                    .attr("height", 15)
+                    .style("fill", (d) => d);
+
+                const colorScale = d3.scaleLinear().domain([1, 14]).range([padding.left, padding.left + 195])
+
+                const colorAxis = d3.axisBottom(colorScale)
+
+                svg.append("g")
                     .attr('id', 'c-axis')
-                    .attr("transform", "translate(0," + (h - padding.bottom+60) + ")")
+                    .attr("transform", "translate(0," + (h - padding.bottom + 60) + ")")
                     .call(colorAxis)
 
 
@@ -247,17 +259,12 @@
     <div class="outer">
         <div class="middle">
             <div class="inner">
-                <h1 id="title">Monthly Global Land-Surface Temperature
-                </h1>
-                <h2 id="description">1753 - 2015: base temperature 8.66<b>℃</b>
-                </h2>
+                <h1 id="title">Monthly Global Land-Surface Temperature</h1>
+                <h2 id="description">1753 - 2015: base temperature 8.66<b>℃</b></h2>
                 <div id="svg-container">
-
                 </div>
             </div>
         </div>
     </div>
-
 </body>
-
 </html>
